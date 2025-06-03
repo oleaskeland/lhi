@@ -15,9 +15,9 @@ class Brain:
     brain = None
     
     @classmethod
-    def Init(cls, data, net, criterion, optimizer, lr, iterations, batch_size=None, 
+    def Init(cls, data, net, criterion, experiment_name, optimizer, lr, iterations, batch_size=None,
              print_every=1000, save=False, callback=None, dtype='float', device='cpu'):
-        cls.brain = cls(data, net, criterion, optimizer, lr, iterations, batch_size, 
+        cls.brain = cls(data, net, criterion, experiment_name, optimizer, lr, iterations, batch_size,
                          print_every, save, callback, dtype, device)
         
     @classmethod
@@ -44,7 +44,7 @@ class Brain:
     def Best_model(cls):
         return cls.brain.best_model
     
-    def __init__(self, data, net, criterion, optimizer, lr, iterations, batch_size, 
+    def __init__(self, data, net, criterion,experiment_name, optimizer, lr, iterations, batch_size,
                  print_every, save, callback, dtype, device):
         self.data = data
         self.net = net
@@ -55,6 +55,7 @@ class Brain:
         self.batch_size = batch_size
         self.print_every = print_every
         self.save = save
+        self.experiment_name = experiment_name
         self.callback = callback
         self.dtype = dtype
         self.device = device
@@ -107,14 +108,17 @@ class Brain:
             loss_test = self.loss_history[best_loss_index, 2]
             print('Best model at iteration {}:'.format(iteration), flush=True)
             print('Train loss:', loss_train, 'Test loss:', loss_test, flush=True)
-            self.best_model = torch.load('model/model{}.pkl'.format(iteration))
+            self.best_model = torch.load(
+                f'model/model{iteration}.pkl',
+                weights_only=False
+            )
         else:
             raise RuntimeError('restore before running or without saved models')
         return self.best_model
     
     def output(self, data, best_model, loss_history, info, path, **kwargs):
         if path is None:
-            path = './outputs/' + time.strftime('%Y-%m-%d-%H-%M-%S',time.localtime(time.time()))
+            path = os.path.join('./outputs', self.experiment_name)  # <- USE THE INSTANCE VARIABLE
         if not os.path.isdir(path): os.makedirs(path)
         if data:
             np.savetxt(path + '/X_train.txt', self.data.X_train_np)

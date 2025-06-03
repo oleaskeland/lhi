@@ -83,23 +83,23 @@ def plot(data, net):
 def main():
     device = 'cpu' # 'cpu' or 'gpu'
     # data
-    x0 = [0, 0, np.pi*3/7, np.pi*3/8]
-    h = 0.75
-    train_num = 200
+    x0 = [0.0, 0.0, np.pi /3, np.pi / 3]
+    h = 0.5
+    train_num = 100
     test_num = 100
     # net
-    net_type = 'LA' # 'LA' or 'G' or 'HNN'
+    net_type = 'LHI' # 'LA' or 'G' or 'HNN'
     LAlayers = 8
     LAsublayers = 5
-    Glayers = 8
-    Gwidth = 50
+    Glayers = 6
+    Gwidth = 11
     activation = 'sigmoid'
-    Hlayers = 4
-    Hwidth = 50
+    Hlayers = 10
+    Hwidth = 20
     Hactivation = 'tanh'
     # training
     lr = 0.001
-    iterations = 50000
+    iterations = 20000
     print_every = 1000
     
     add_h = True if net_type == 'HNN' else False
@@ -107,14 +107,22 @@ def main():
     data = DBData(x0, h, train_num, test_num, add_h)
     if net_type == 'LA':
         net = ln.nn.LASympNet(data.dim, LAlayers, LAsublayers, activation)
+    if net_type == 'LHI':
+        net = ln.nn.LHI(dim=data.dim, h=h, shears=3, hidden_dim=6)
     elif net_type == 'G':
         net = ln.nn.GSympNet(data.dim, Glayers, Gwidth, activation)
     elif net_type == 'HNN':
         net = ln.nn.HNN(data.dim, Hlayers, Hwidth, Hactivation)
+
+    #print #trainable params for net
+    params = [p for p in net.parameters() if p.requires_grad]
+    print(f"Total trainable parameters in {net_type}: {sum(p.numel() for p in params)}")
+
     args = {
         'data': data,
         'net': net,
         'criterion': criterion,
+        "experiment_name": f'double_pendulum_{h}_{net_type}',
         'optimizer': 'adam',
         'lr': lr,
         'iterations': iterations,

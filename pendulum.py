@@ -51,6 +51,8 @@ def plot(data, net):
     plt.legend()
     plt.savefig('pendulum.pdf')
 
+
+
 def main():
     device = 'cpu' # 'cpu' or 'gpu'
     # data
@@ -59,18 +61,18 @@ def main():
     train_num = 40
     test_num = 100
     # net
-    net_type = 'LA' # 'LA' or 'G' or 'HNN'
+    net_type = 'LHI' # 'LA' or 'G' or 'HNN'
     LAlayers = 3
     LAsublayers = 2
-    Glayers = 5
-    Gwidth = 30
+    Glayers = 4
+    Gwidth = 6
     activation = 'sigmoid'
-    Hlayers = 4
-    Hwidth = 30
+    Hlayers = 2
+    Hwidth = 8
     Hactivation = 'tanh'
     # training
     lr = 0.001
-    iterations = 50000
+    iterations = 20000
     print_every = 1000
     
     add_h = True if net_type == 'HNN' else False
@@ -78,6 +80,8 @@ def main():
     data = PDData(x0, h, train_num, test_num, add_h)
     if net_type == 'LA':
         net = ln.nn.LASympNet(data.dim, LAlayers, LAsublayers, activation)
+    if net_type == 'LHI':
+        net = ln.nn.LHI(dim=data.dim, h=h, shears=1, hidden_dim=3)
     elif net_type == 'G':
         net = ln.nn.GSympNet(data.dim, Glayers, Gwidth, activation)
     elif net_type == 'HNN':
@@ -87,6 +91,7 @@ def main():
         'net': net,
         'criterion': criterion,
         'optimizer': 'adam',
+        "experiment_name": f'pendulum_{h}_{net_type}',
         'lr': lr,
         'iterations': iterations,
         'batch_size': None,
@@ -96,6 +101,9 @@ def main():
         'dtype': 'float',
         'device': device
     }
+    # print #trainable params for net
+    params = [p for p in net.parameters() if p.requires_grad]
+    print(f"Total trainable parameters in {net_type}: {sum(p.numel() for p in params)}")
     
     ln.Brain.Init(**args)
     ln.Brain.Run()
