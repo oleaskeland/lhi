@@ -73,12 +73,10 @@ class LHI(nn.Module):
 
         # loop over the shear banks
         for i in range(self.shears):
-            v_grad_i = self.v_nets[i]
-            h_grad_i = self.h_nets[i]
 
-            p, q = self._v_shear(p, q, v_grad_i, h_i * 1/2)  # ½ V
-            p, q = self._h_shear(p, q, h_grad_i, h_i)  # H
-            p, q = self._v_shear(p, q, v_grad_i, h_i * 1/2)  # ½ V
+            p, q = self._v_shear(p, q, self.v_nets[i], h_i * 1/2)  # ½ V
+            p, q = self._h_shear(p, q, self.h_nets[i], h_i)  # H
+            p, q = self._v_shear(p, q, self.v_nets[i], h_i * 1/2)  # ½ V
 
         return p, q
 

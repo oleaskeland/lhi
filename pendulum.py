@@ -58,7 +58,7 @@ def main():
     # data
     x0 = [0, 1]
     h = 0.1
-    train_num = 40
+    train_num = 50
     test_num = 100
     # net
     net_type = 'LHI' # 'LA' or 'G' or 'HNN'
@@ -81,7 +81,7 @@ def main():
     if net_type == 'LA':
         net = ln.nn.LASympNet(data.dim, LAlayers, LAsublayers, activation)
     if net_type == 'LHI':
-        net = ln.nn.LHI(dim=data.dim, h=h, shears=1, hidden_dim=3)
+        net = ln.nn.LHI(dim=data.dim, h=h, shears=1, hidden_dim=2)
     elif net_type == 'G':
         net = ln.nn.GSympNet(data.dim, Glayers, Gwidth, activation)
     elif net_type == 'HNN':
